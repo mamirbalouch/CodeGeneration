@@ -19,9 +19,9 @@ class Program
         HelperFunctions.CreateAllDirectories();
         //get list of all tables
         DataConextGenerationClass.StartDataConextGeneration();
-        HelperClassGeneration.StartHelperClassGeneration();
 
         DataTable tablesSchema = HelperFunctions.GetTablesList(HelperFunctions.connectionString);
+        HelperClassGeneration.StartHelperClassGeneration(tablesSchema);
 
         // Iterate through each table
         foreach (DataRow table in tablesSchema.Rows)
@@ -135,8 +135,8 @@ class Program
         sb.AppendLine($"namespace {HelperFunctions.nameSpaceName}.Mappers;");
         sb.AppendLine();
 
-        sb.AppendLine($"public static class {modelName}Mappers");
-        sb.AppendLine("{");
+        sb.AppendLine($"public static partial class {modelName}Mappers");
+        sb.AppendLine($"{{");
 
         //code to generate todto code for general dto
         sb.AppendLine($"    public static {modelName}Dto To{modelName}Dto (this {modelName} {modelName}Model)");
@@ -169,6 +169,25 @@ class Program
         // Save the model code to a .cs file
         string filePath = Path.Combine(HelperFunctions.mapperDirectory, $"{modelName}Mappers.cs");
         File.WriteAllText(filePath, sb.ToString());
+
+        //partial class extenson for controllers
+        filePath = Path.Combine(HelperFunctions.mapperDirectory, $"{modelName}Mappers.Extensions.cs");
+        if (File.Exists(filePath)) return;//if there is a partial class, don't change it
+        sb.Clear();
+        sb.AppendLine($"using System.ComponentModel.DataAnnotations;");
+        sb.AppendLine($"using System.Collections.Generic;");
+        sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Dtos.{modelName};");
+        sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Models;");
+        sb.AppendLine();
+
+        sb.AppendLine($"namespace {HelperFunctions.nameSpaceName}.Mappers;");
+        sb.AppendLine();
+
+        sb.AppendLine($"public static partial class {modelName}Mappers");
+        sb.AppendLine($"{{");
+        sb.AppendLine($"}}");
+        File.WriteAllText(filePath, sb.ToString());
+
     }
     static void GenerateIRepository(string tableName, string modelName)
     {
@@ -221,7 +240,7 @@ class Program
         sb.AppendLine($"namespace {HelperFunctions.nameSpaceName}.Repository;");
         sb.AppendLine();
 
-        sb.AppendLine($"public class {modelName}Repository : I{modelName}Repository");
+        sb.AppendLine($"public partial class {modelName}Repository : I{modelName}Repository");
         sb.AppendLine("{");
 
         sb.AppendLine($"    private readonly ApplicationDBContext _context;");
@@ -304,6 +323,28 @@ class Program
         // Save the model code to a .cs file
         string filePath = Path.Combine(HelperFunctions.repositoryDirectory, $"{modelName}Repository.cs");
         File.WriteAllText(filePath, sb.ToString());
+
+        //generating partial class for repository
+        filePath = Path.Combine(HelperFunctions.repositoryDirectory, $"{modelName}Repository.Extensions.cs");
+        if (File.Exists(filePath)) return; //if there is a partial class, don't change it
+
+        sb.Clear();
+        sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Dtos.{modelName};");
+        sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Data;");
+        sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Helpers;");
+        sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Interfaces;");
+        sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Models;");
+        sb.AppendLine($"using Microsoft.EntityFrameworkCore;");
+        sb.AppendLine();
+
+        sb.AppendLine($"namespace {HelperFunctions.nameSpaceName}.Repository;");
+        sb.AppendLine();
+        sb.AppendLine($"public partial class {modelName}Repository : I{modelName}Repository");
+        sb.AppendLine($"{{");
+        sb.AppendLine($"}}");
+
+        File.WriteAllText(filePath, sb.ToString());
+
     }
 
     static string RepositoryUpdateColumns(string tableName, string modelName)
