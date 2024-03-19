@@ -26,19 +26,6 @@ namespace CodeGenerationConsole
             sb.AppendLine($"    {{");
             sb.AppendLine($"");
 
-            //add the following code in program.cs to inject repositories
-            sb.AppendLine($"//add the following code in program.cs to inject repositories");
-            foreach (DataRow table in tablesSchema.Rows)
-            {
-                string tableName = table["TABLE_NAME"].ToString();
-                string modelName = HelperFunctions.GetSingularTableName(tableName);
-                string pluralModelName = HelperFunctions.GetPluralTableName(modelName);
-                if (tableName.ToLower().StartsWith("sysdiagram")) continue;
-
-                if (tableName.ToLower().StartsWith("sysdiagram")) continue;
-                sb.AppendLine($"        //builder.Services.AddScoped<I{modelName}Repository, {modelName}Repository>();");
-            }
-            sb.AppendLine();
 
             // Iterate through each table
             foreach (DataRow table in tablesSchema.Rows)
@@ -82,7 +69,7 @@ namespace CodeGenerationConsole
                     sb.AppendLine($"            builder.Entity<{modelName}>()");
                     sb.AppendLine($"                .HasOne(u => u.{referencedTable})");
                     sb.AppendLine($"                .WithMany(u => u.{pluralModelName})");
-                    sb.AppendLine($"                .HasForeignKey(p => p.{parentColumn});");
+                    sb.AppendLine($"                .HasForeignKey(p => p.{parentColumn}).OnDelete(DeleteBehavior.NoAction);");
                 }//foreach foreign key
             }//for each table row
             sb.AppendLine($"        }}");//end of on model creating
@@ -90,6 +77,19 @@ namespace CodeGenerationConsole
             sb.AppendLine($"    }}");//end of appcontext class
             sb.AppendLine($"}}");//end of namespace
             string filePath = Path.Combine(HelperFunctions.dataDirectory, $"ApplicationDbContext.cs");
+            File.WriteAllText(filePath, sb.ToString());
+
+            //partial class extenson for dbContext
+            filePath = Path.Combine(HelperFunctions.dataDirectory, $"ApplicationDbContext.Extensions.cs");
+            if (File.Exists(filePath)) return;//if there is a partial class, don't change it
+            sb.Clear();
+            sb.AppendLine($"using Microsoft.EntityFrameworkCore;");
+            sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Models;");
+            sb.AppendLine($"namespace {HelperFunctions.nameSpaceName}.Data;");
+            sb.AppendLine($"");
+            sb.AppendLine($"public partial class ApplicationDBContext : DbContext");
+            sb.AppendLine($"{{");
+            sb.AppendLine($"}}");
             File.WriteAllText(filePath, sb.ToString());
 
         }//generate

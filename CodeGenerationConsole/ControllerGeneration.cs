@@ -35,7 +35,7 @@ namespace CodeGenerationConsole
 
             sb.AppendLine($"[Route(\"api/{modelName.ToLower()}\")]");
             sb.AppendLine($"[ApiController]");
-            sb.AppendLine($"public class {modelName}Controller : ControllerBase");
+            sb.AppendLine($"public partial class {modelName}Controller : ControllerBase");
             sb.AppendLine($"{{");
 
             sb.AppendLine($"    private readonly ApplicationDBContext _context;");
@@ -48,7 +48,7 @@ namespace CodeGenerationConsole
              sb.AppendLine($"");
 
             sb.AppendLine($"    [HttpGet]");
-            sb.AppendLine($"    [Authorize(\"all\")]");
+            sb.AppendLine($"    //[Authorize]");
             sb.AppendLine($"    public async Task<IActionResult> GetAll()");
             sb.AppendLine($"    {{");
             sb.AppendLine($"        if (!ModelState.IsValid)");
@@ -64,7 +64,7 @@ namespace CodeGenerationConsole
 
 
             sb.AppendLine($"    [HttpGet(\"pagewise\")]");
-             sb.AppendLine($"    [Authorize]");
+             sb.AppendLine($"    //[Authorize]");
              sb.AppendLine($"    public async Task<IActionResult> GetAll([FromQuery] QueryObject query)");
              sb.AppendLine($"    {{");
              sb.AppendLine($"        if (!ModelState.IsValid)");
@@ -145,6 +145,29 @@ namespace CodeGenerationConsole
             // Save the model code to a .cs file
             string filePath = Path.Combine(HelperFunctions.controllerDirectory, $"{modelName}Controller.cs");
             File.WriteAllText(filePath, sb.ToString());
+
+            //partial class extenson for controllers
+            filePath = Path.Combine(HelperFunctions.controllerDirectory, $"{modelName}Controller.Extensions.cs");
+            if (File.Exists(filePath)) return;//if there is a partial class, don't change it
+            sb.Clear();
+            sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Dtos.{modelName};");
+            sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Data;");
+            sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Helpers;");
+            sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Interfaces;");
+            sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Mappers;");
+            sb.AppendLine($"using Microsoft.EntityFrameworkCore;");
+            sb.AppendLine($"using Microsoft.AspNetCore.Authorization;");
+            sb.AppendLine($"using Microsoft.AspNetCore.Mvc;");
+            sb.AppendLine();
+
+            sb.AppendLine($"namespace {HelperFunctions.nameSpaceName}.Controllers;");
+            sb.AppendLine();
+
+            sb.AppendLine($"public partial class {modelName}Controller : ControllerBase");
+            sb.AppendLine($"{{");
+            sb.AppendLine($"}}");
+            File.WriteAllText(filePath, sb.ToString());
+
         }//generate
 
         static string ControllerUpdateColumns(string tableName, string modelName)
