@@ -22,7 +22,7 @@ namespace CodeGenerationConsole
             sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Models;");
             sb.AppendLine($"namespace {HelperFunctions.nameSpaceName}.Data");
             sb.AppendLine($"{{");
-            sb.AppendLine($"    public partial class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)");
+            sb.AppendLine($"    public  class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)");
             sb.AppendLine($"    {{");
             sb.AppendLine($"");
 
@@ -79,19 +79,7 @@ namespace CodeGenerationConsole
             string filePath = Path.Combine(HelperFunctions.dataDirectory, $"ApplicationDbContext.cs");
             File.WriteAllText(filePath, sb.ToString());
 
-            //partial class extenson for dbContext
-            filePath = Path.Combine(HelperFunctions.dataDirectory, $"ApplicationDbContext.Extensions.cs");
-            if (File.Exists(filePath)) return;//if there is a partial class, don't change it
-            sb.Clear();
-            sb.AppendLine($"using Microsoft.EntityFrameworkCore;");
-            sb.AppendLine($"using {HelperFunctions.nameSpaceName}.Models;");
-            sb.AppendLine($"namespace {HelperFunctions.nameSpaceName}.Data;");
-            sb.AppendLine($"");
-            sb.AppendLine($"public partial class ApplicationDBContext : DbContext");
-            sb.AppendLine($"{{");
-            sb.AppendLine($"}}");
-            File.WriteAllText(filePath, sb.ToString());
-
+            
         }//generate
 
 

@@ -14,8 +14,8 @@ namespace CodeGenerationConsole
 
     public static class HelperFunctions
     {
-        public static string connectionString = "Data Source=DESKTOP-CMTOCQ4\\MSSQL2022;Initial Catalog=SemsDb;Integrated Security=True;";
-        public static string nameSpaceName = "SemsCodeGenTest.Api";
+        public static string connectionString = "Data Source=DESKTOP-CMTOCQ4\\MSSQL2022;Initial Catalog=CodeGen_PfmSems;Integrated Security=True;";
+        public static string nameSpaceName = "Api";
         // Directory where you want to save the generated models
         public static string outputDirectory = "C:\\Alpha\\techsarena\\GenCode\\";
         public static string modelDirectory = outputDirectory + "Models";
